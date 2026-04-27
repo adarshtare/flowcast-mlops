@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+mlruns/
+*.db
+models/*.ubj
+data/raw/
+logs/
+.DS_Store
