@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from sklearn.metrics import mean_squared_error
 import xgboost as xgb
@@ -6,6 +7,7 @@ import mlflow
 import mlflow.xgboost
 
 DATA_PATH = "data/processed/traffic_processed.csv"
+MODEL_PATH = "models/model.ubj"
 
 
 def load_data():
@@ -29,7 +31,7 @@ def split_data(df):
     return X_train, X_test, y_train, y_test
 
 
-# ----------- XGBOOST (OPTIMIZED) -----------
+# ----------- XGBOOST (PRIMARY MODEL) -----------
 def train_xgb(X_train, y_train):
     model = xgb.XGBRegressor(
         n_estimators=500,
@@ -47,7 +49,7 @@ def train_xgb(X_train, y_train):
     return model
 
 
-# ----------- LIGHTGBM -----------
+# ----------- LIGHTGBM (BASELINE COMPARISON) -----------
 def train_lgb(X_train, y_train):
     model = lgb.LGBMRegressor(
         n_estimators=500,
@@ -67,28 +69,40 @@ def evaluate(model, X_test, y_test):
     return rmse
 
 
+def save_model(model):
+    os.makedirs("models", exist_ok=True)
+    model.save_model(MODEL_PATH)
+    print(f"Model saved at {MODEL_PATH}")
+
+
 def main():
     df = load_data()
     X_train, X_test, y_train, y_test = split_data(df)
 
     mlflow.set_experiment("flowcast-traffic")
 
-    # -------- XGBOOST --------
+    # -------- XGBOOST MAIN MODEL --------
     with mlflow.start_run(run_name="xgboost_final"):
-        model = train_xgb(X_train, y_train)
-        rmse = evaluate(model, X_test, y_test)
+        xgb_model = train_xgb(X_train, y_train)
+        rmse = evaluate(xgb_model, X_test, y_test)
 
         print(f"XGBoost RMSE: {rmse}")
 
         mlflow.log_param("model", "xgboost")
         mlflow.log_metric("rmse", rmse)
 
-        mlflow.xgboost.log_model(model, name="model")
+        mlflow.xgboost.log_model(
+            xgb_model,
+            name="model"
+        )
 
-    # -------- LIGHTGBM --------
+        # Save artifact for DVC + inference API
+        save_model(xgb_model)
+
+    # -------- LIGHTGBM BENCHMARK --------
     with mlflow.start_run(run_name="lightgbm_final"):
-        model = train_lgb(X_train, y_train)
-        rmse = evaluate(model, X_test, y_test)
+        lgb_model = train_lgb(X_train, y_train)
+        rmse = evaluate(lgb_model, X_test, y_test)
 
         print(f"LightGBM RMSE: {rmse}")
 

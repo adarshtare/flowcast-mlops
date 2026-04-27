@@ -1,0 +1,15 @@
+stages:
+  preprocess:
+    cmd: python -m src.data_pipeline
+    deps:
+    - data/raw/traffic.csv
+    - src/data_pipeline.py
+    outs:
+    - data/processed/traffic_processed.csv
+  train:
+    cmd: python -m src.train
+    deps:
+    - data/processed/traffic_processed.csv
+    - src/train.py
+    outs:
+    - models/model.ubj

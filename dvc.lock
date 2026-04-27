@@ -1,0 +1,35 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python -m src.data_pipeline
+    deps:
+    - path: data/raw/traffic.csv
+      hash: md5
+      md5: f13e9456683f057a6a0cf82f7d64bec7
+      size: 3237208
+      isexec: true
+    - path: src/data_pipeline.py
+      hash: md5
+      md5: 6cc8386bd3440edc0b8a98420d6ff8eb
+      size: 1447
+    outs:
+    - path: data/processed/traffic_processed.csv
+      hash: md5
+      md5: 4df2100c47b82fe69a1e99f123759a58
+      size: 18274336
+  train:
+    cmd: python -m src.train
+    deps:
+    - path: data/processed/traffic_processed.csv
+      hash: md5
+      md5: 4df2100c47b82fe69a1e99f123759a58
+      size: 18274336
+    - path: src/train.py
+      hash: md5
+      md5: 55a5012b22e40d8050593b83ea578708
+      size: 2740
+    outs:
+    - path: models/model.ubj
+      hash: md5
+      md5: 2328f2bf1398dcabe7151c963e10289b
+      size: 17500622
