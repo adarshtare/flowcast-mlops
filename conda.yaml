@@ -1,0 +1,14 @@
+name: flowcast-env
+
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - fastapi
+      - uvicorn
+      - pandas
+      - scikit-learn
+      - xgboost
+      - lightgbm
+      - mlflow
+      - prometheus-client

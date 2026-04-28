@@ -1,0 +1,14 @@
+name: flowcast
+
+conda_env: conda.yaml
+
+entry_points:
+
+  train:
+    command: "python -m src.train"
+
+  pipeline:
+    command: "python -m src.data_pipeline"
+
+  api:
+    command: "uvicorn src.api:app --host 0.0.0.0 --port 8001"
