@@ -1,78 +1,151 @@
 # High Level Design — FlowCast
 
-## System Overview
+# 1. Problem Statement
+Build an end-to-end MLOps platform for traffic prediction supporting:
 
-FlowCast is an end-to-end MLOps system for traffic prediction composed of:
+- scalable model training
+- reproducible pipelines
+- monitoring
+- API deployment
+- containerized serving
 
-1. Data Engineering Layer
+---
+
+# 2. System Overview
+
+FlowCast consists of:
+
+## Data Engineering Layer
 - CSV ingestion
 - Feature engineering
-- DVC controlled preprocessing pipeline
+- DVC controlled preprocessing
 - Airflow orchestration DAG
 
-2. Model Development Layer
+## Model Development Layer
 - XGBoost training
 - LightGBM benchmarking
 - MLflow experiment tracking
-- Model registry artifacts
+- Model registry
 
-3. Serving Layer
+## Serving Layer
 - FastAPI inference backend
-- REST endpoints
+- REST APIs
 - Prometheus instrumentation
 
-4. Frontend Layer
+## Frontend Layer
 - Streamlit UI
-- REST communication with backend
-- Loose coupling via APIs
+- REST communication
+- Loose coupling
 
-5. Deployment Layer
+## Deployment Layer
 - Dockerized frontend/backend
-- Docker Compose multi-service orchestration
+- Docker Compose orchestration
 
-6. Monitoring Layer
+## Monitoring Layer
 - Prometheus metrics
 - Grafana dashboards
-- Health and readiness probes
+- Health probes
 
+---
 
-## Architectural Design Principles
+# 3. Architecture Principles
+
 - Loose coupling
-- Modular components
-- Containerized deployment
-- Reproducible ML pipelines
-- Observable services
-- Version-controlled data and models
+- Modular architecture
+- Reproducibility
+- Observability
+- Containerization
+- Version control for data/models
 
+---
 
-## Major Interfaces
-Frontend -> FastAPI REST API  
-FastAPI -> Model Artifact  
-Prometheus -> Metrics endpoint  
-Grafana -> Prometheus datasource  
-Airflow -> Pipeline orchestration  
-DVC -> Pipeline dependency graph
+# 4. Design Choice Rationale
 
+## Why Airflow?
+Used for:
+- scheduling
+- orchestration
+- dependency tracking
 
-## Throughput
+Preferred over cron for DAG support.
+
+## Why MLflow?
+Used for:
+- experiment tracking
+- metrics logging
+- model registry
+
+## Why DVC?
+Provides:
+- data versioning
+- reproducibility
+- CI style ML pipelines
+
+## Why FastAPI?
+Chosen for:
+- lightweight serving
+- REST APIs
+- high performance
+
+---
+
+# 5. Major Interfaces
+
+Frontend → FastAPI  
+FastAPI → Model Artifact  
+Airflow → ML pipeline orchestration  
+Airflow Training Task → MLflow  
+DVC → Pipeline DAG  
+Prometheus → Metrics endpoint  
+Grafana → Monitoring dashboards
+
+---
+
+# 6. System Throughput
+
 Inference latency:
 ~150 ms
 
 Container startup:
 ~5 sec
 
-Pipeline execution:
-Batch preprocessing + model training reproducible
+Pipeline throughput:
+Batch preprocessing + model training reproducible.
 
+---
 
-## Technology Stack
-Git
-DVC
-Airflow
-MLflow
-FastAPI
-Prometheus
-Grafana
-Docker
-Streamlit
+# 7. Deployment Architecture
+
+Dockerized services:
+- frontend
+- backend
+- monitoring
+
+Managed using docker-compose.
+
+Loose coupling preserved through REST APIs.
+
+---
+
+# 8. Technology Stack
+
+Git  
+DVC  
+Airflow  
+MLflow  
+FastAPI  
+Prometheus  
+Grafana  
+Docker  
+Streamlit  
 XGBoost
+
+---
+
+# 9. Future Scalability
+
+Future extensions:
+- retraining automation
+- drift detection
+- kubernetes deployment
+- streaming inference
