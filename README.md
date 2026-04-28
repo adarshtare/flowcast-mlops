@@ -21,29 +21,38 @@ The project implements a full AI product lifecycle:
 
 ```bash
 flowcast/
-├── airflow_dags/               # Airflow orchestration DAGs
-├── src/                        # Data, features, training, APIs
+├── airflow_dags/
+├── src/
 ├── data/
 │   ├── raw/
 │   └── processed/
-├── models/                     # Serialized trained models
-├── tests/                      # Unit & integration tests
-│
+├── models/
+├── tests/
+
 ├── Dockerfile.api
 ├── Dockerfile.ui
 ├── docker-compose.yml
 ├── dvc.yaml
+├── dvc.lock
 ├── MLproject
 ├── prometheus.yml
-│
+├── conda.yaml
+
+├── README.md
+├── ARCHITECTURE.md
 ├── AIRFLOW_PIPELINE.md
 ├── GRAFANA_MONITORING.md
 ├── HLD.md
 ├── LLD.md
+├── CI_CD.md
+├── CHALLENGES.md
 ├── TEST_PLAN.md
 ├── TEST_REPORT.md
 ├── USER_MANUAL.md
-└── README.md
+├── report_flowcast.pdf
+
+├── flowcastdiagram.drawio
+└── requirements.txt
 ```
 
 ---
