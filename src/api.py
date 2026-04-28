@@ -7,16 +7,25 @@ import math
 import logging
 
 # ---------------------------------
-# Logging
+# Structured Logging
 # ---------------------------------
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+)
+logger = logging.getLogger("flowcast_api")
+
 
 # ---------------------------------
 # Load model
 # ---------------------------------
+logger.info("Loading XGBoost model...")
+
 model = xgb.XGBRegressor()
 model.load_model("models/model.ubj")
+
+logger.info("Model loaded successfully")
+
 
 app = FastAPI(
     title="FlowCast Traffic Predictor",
@@ -47,17 +56,22 @@ class TrafficInput(BaseModel):
 # ---------------------------------
 @app.get("/")
 def home():
+    logger.info("Home endpoint called")
     return {"status": "running"}
+
 
 @app.get("/health")
 def health():
+    logger.info("Health endpoint called")
     return {
         "status": "healthy",
         "model_loaded": True
     }
 
+
 @app.get("/ready")
 def ready():
+    logger.info("Readiness endpoint called")
     return {"status": "ready"}
 
 
@@ -68,7 +82,10 @@ def ready():
 def predict(data: TrafficInput):
 
     try:
-        logger.info("Prediction request received")
+        logger.info(
+            f"Prediction request received | "
+            f"hour={data.hour}, temp={data.temp}, weather={data.weather_main}"
+        )
 
         row = {
             "temp": data.temp,
@@ -109,7 +126,9 @@ def predict(data: TrafficInput):
             "month_cos": math.cos(2*math.pi*data.month/12),
         }
 
-        # Weather one-hot encoding
+        # ---------------------------------
+        # Weather One-Hot Encoding
+        # ---------------------------------
         weather_cols = [
             "weather_main_Clouds",
             "weather_main_Drizzle",
@@ -130,9 +149,15 @@ def predict(data: TrafficInput):
 
         if chosen in row:
             row[chosen] = 1
+        else:
+            logger.warning(
+                f"Unknown weather category '{data.weather_main}', using defaults"
+            )
 
 
-        # Holiday one-hot placeholders
+        # ---------------------------------
+        # Holiday placeholders
+        # ---------------------------------
         holiday_cols = [
             "holiday_Columbus_Day",
             "holiday_Independence_Day",
@@ -188,7 +213,6 @@ def predict(data: TrafficInput):
             "holiday_Washingtons_Birthday"
         ]
 
-
         df = pd.DataFrame([row])
 
         for c in expected_cols:
@@ -199,14 +223,14 @@ def predict(data: TrafficInput):
 
         pred = model.predict(df)[0]
 
-        logger.info(f"Prediction success: {pred}")
+        logger.info(f"Prediction successful | traffic_volume={int(pred)}")
 
         return {
             "predicted_traffic_volume": int(pred)
         }
 
     except Exception as e:
-        logger.exception("Inference failed")
+        logger.exception("Inference failed with exception")
         raise HTTPException(
             status_code=500,
             detail=str(e)
